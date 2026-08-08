@@ -1,26 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <title>themephile</title>
   <defs>
+    <!-- Same hue-wheel cycle as docs/logo.svg, without the rotation — at 16px
+         a spinning gradient is just noise. Browsers that don't animate
+         favicons show the first frame, which is Nocturne's accent pair. -->
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#a7bfff">
-        <animate
-          attributeName="stop-color"
-          dur="12s"
-          repeatCount="indefinite"
-          values="#a7bfff;#f399ff;#77da95;#01d8f9;#bcb7ff;#a7bfff"
-          calcMode="spline"
-          keyTimes="0;0.2;0.4;0.6;0.8;1"
-          keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1" />
+      <stop offset="0" stop-color="#9fbdfe">
+        <animate attributeName="stop-color" dur="14s" repeatCount="indefinite"
+          keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"
+          values="#9fbdfe;#d8a4ff;#ff98c2;#ffa281;#e5b64a;#a1cf6f;#40dab9;#34d1f9;#9fbdfe" />
       </stop>
-      <stop offset="1" stop-color="#fe9bbd">
-        <animate
-          attributeName="stop-color"
-          dur="12s"
-          repeatCount="indefinite"
-          values="#fe9bbd;#ffbe83;#83cdff;#dbbc47;#7feb7a;#fe9bbd"
-          calcMode="spline"
-          keyTimes="0;0.2;0.4;0.6;0.8;1"
-          keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1" />
+      <stop offset="1" stop-color="#f39be0">
+        <animate attributeName="stop-color" dur="14s" repeatCount="indefinite"
+          keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"
+          values="#f39be0;#ff9d9d;#f9aa58;#c3c555;#6ed797;#0cd7e0;#7fc5ff;#bcb2ff;#f39be0" />
       </stop>
     </linearGradient>
   </defs>

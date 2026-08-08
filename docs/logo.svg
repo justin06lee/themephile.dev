@@ -1,24 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="128" height="128" role="img" aria-label="themephile logo">
   <title>themephile</title>
   <defs>
+    <!--
+      Both stops walk the full hue wheel at a fixed OKLCh lightness and chroma,
+      70° apart. SMIL interpolates stop-color in sRGB, so the steps are kept to
+      45° — jumping between opposite hues would fade through gray on the way.
+      Starting hue is Nocturne's accent.
+    -->
     <linearGradient id="tp" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
-      <!-- The gradient drifts through the accent/string pair of each preset. -->
-      <stop offset="0" stop-color="#a7bfff">
-        <animate attributeName="stop-color" dur="16s" repeatCount="indefinite"
-          calcMode="spline"
+      <stop offset="0" stop-color="#9fbdfe">
+        <animate attributeName="stop-color" dur="14s" repeatCount="indefinite"
           keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"
-          keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"
-          values="#a7bfff;#f399ff;#77da95;#01d8f9;#bcb7ff;#aec8be;#a9352d;#006f8a;#a7bfff" />
+          values="#9fbdfe;#d8a4ff;#ff98c2;#ffa281;#e5b64a;#a1cf6f;#40dab9;#34d1f9;#9fbdfe" />
       </stop>
-      <stop offset="1" stop-color="#fe9bbd">
-        <animate attributeName="stop-color" dur="16s" repeatCount="indefinite"
-          calcMode="spline"
+      <stop offset="1" stop-color="#f39be0">
+        <animate attributeName="stop-color" dur="14s" repeatCount="indefinite"
           keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1"
-          keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"
-          values="#fe9bbd;#ffbe83;#83cdff;#dbbc47;#7feb7a;#c7cde0;#66740b;#935f00;#fe9bbd" />
+          values="#f39be0;#ff9d9d;#f9aa58;#c3c555;#6ed797;#0cd7e0;#7fc5ff;#bcb2ff;#f39be0" />
       </stop>
       <animateTransform attributeName="gradientTransform" type="rotate"
-        from="0 0.5 0.5" to="360 0.5 0.5" dur="16s" repeatCount="indefinite" />
+        from="0 0.5 0.5" to="360 0.5 0.5" dur="14s" repeatCount="indefinite" />
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="20" ry="20" fill="url(#tp)" />
