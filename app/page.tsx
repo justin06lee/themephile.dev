@@ -11,8 +11,12 @@ const tmuxDemo = defaultTmuxConfig(PRESETS[0]);
 
 const FEATURES = [
   {
+    title: "Five previews, one theme",
+    body: "VS Code, Neovim, Vim, Emacs, and a terminal — each drawn as itself, down to Neovim's sign column, Vim's ~ filler, and Emacs' boxed modeline. Judge the theme where you'll actually read it.",
+  },
+  {
     title: "Click the code, not a list",
-    body: "Every token in the preview is a hit target. Click a keyword, change the keyword color. Selecting a role lights up everywhere it appears.",
+    body: "Every token in the preview is a hit target — and so is every piece of chrome. Click a keyword, change the keyword color. Selecting a role lights up everywhere it appears.",
   },
   {
     title: "Colors that behave",
@@ -25,6 +29,10 @@ const FEATURES = [
   {
     title: "Nothing leaves the tab",
     body: "No account, no upload, no analytics. Your theme lives in the URL fragment and in local storage — share a link and the whole palette rides along.",
+  },
+  {
+    title: "Real configs, not color lists",
+    body: "Workbench chrome and semantic tokens for VS Code, treesitter and LSP groups for Neovim, cterm fallbacks for Vim, font-lock and org faces for Emacs — each with install steps.",
   },
 ];
 
@@ -76,8 +84,8 @@ export default function Home() {
               <div className="flex flex-1 flex-col gap-2 p-6">
                 <h3 className="text-lg font-medium tracking-tight">Theme editor</h3>
                 <p className="text-sm leading-relaxed text-ink-dim">
-                  Six languages of live preview, a full editor mock-up with tabs and
-                  a status line, an ANSI terminal, and one-click export to ten
+                  Preview as VS Code, Neovim, Vim, Emacs, or a terminal — each drawn
+                  as the real program. Six languages, 48 editable roles, ten export
                   targets.
                 </p>
                 <span className="mt-3 font-mono text-[11px] text-ink-faint transition-colors group-hover:text-[var(--accent)]">

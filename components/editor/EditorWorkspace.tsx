@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { readableOn } from "@/lib/color";
-import { LANGUAGES, type LangId } from "@/lib/highlight/tokenize";
-import { SAMPLES } from "@/lib/highlight/samples";
-import { CodeSurface } from "@/components/preview/CodeSurface";
-import { EditorChrome } from "@/components/preview/EditorChrome";
-import { TerminalMock } from "@/components/preview/TerminalMock";
+import type { LangId } from "@/lib/highlight/tokenize";
+import {
+  PreviewStage,
+  targetById,
+  type PreviewTargetId,
+} from "@/components/preview/PreviewStage";
 import { DEFAULT_THEME } from "@/lib/theme/presets";
 import type { RoleId } from "@/lib/theme/roles";
 import {
@@ -49,6 +50,7 @@ export function EditorWorkspace() {
   const [{ theme, history }, setState] = useState<EditorState>(restore);
   const [role, setRole] = useState<RoleId>("keyword");
   const [lang, setLang] = useState<LangId>("tsx");
+  const [target, setTarget] = useState<PreviewTargetId>("vscode");
   const [exportOpen, setExportOpen] = useState(false);
 
   // ── persist + keep the share link live ──
@@ -139,32 +141,16 @@ export function EditorWorkspace() {
           <RoleList theme={theme} selected={role} onSelect={setRole} />
         </aside>
 
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-3">
-          <div className="min-h-0 flex-[7]">
-            <EditorChrome
-              theme={theme}
-              filename={LANGUAGES.find((l) => l.id === lang)?.filename ?? ""}
-              tabs={LANGUAGES.map((l) => ({ id: l.id, label: l.label }))}
-              activeTab={lang}
-              onTabChange={(id) => setLang(id as LangId)}
-              activeRole={role}
-              onPickRole={setRole}
-            >
-              <CodeSurface
-                theme={theme}
-                lang={lang}
-                code={SAMPLES[lang]}
-                activeRole={role}
-                onPickRole={setRole}
-                cursorLine={9}
-                className="h-full"
-              />
-            </EditorChrome>
-          </div>
-
-          <div className="hidden min-h-0 flex-[3] md:block">
-            <TerminalMock theme={theme} onPickRole={setRole} activeRole={role} />
-          </div>
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col p-3">
+          <PreviewStage
+            theme={theme}
+            target={target}
+            onTargetChange={setTarget}
+            lang={lang}
+            onLangChange={setLang}
+            activeRole={role}
+            onPickRole={setRole}
+          />
         </section>
 
         <aside className="shrink-0 border-t border-line lg:w-[312px] lg:border-t-0 lg:border-l">
@@ -177,10 +163,13 @@ export function EditorWorkspace() {
         </aside>
       </main>
 
+      {/* Keyed by target so opening Export lands on whatever you're previewing. */}
       <ExportDialog
+        key={target}
         theme={theme}
         open={exportOpen}
         onClose={() => setExportOpen(false)}
+        initialTarget={targetById(target).exportId}
       />
     </div>
   );
