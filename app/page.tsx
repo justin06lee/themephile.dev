@@ -1,69 +1,179 @@
-import Image from "next/image";
+import Link from "next/link";
+import { HeroPreview } from "@/components/site/HeroPreview";
+import { SiteFooter, SiteNav } from "@/components/site/SiteNav";
+import { TmuxStatusBar } from "@/components/tmux/TmuxStatusBar";
+import { TARGETS } from "@/lib/export";
+import { PRESETS } from "@/lib/theme/presets";
+import { ROLE_IDS } from "@/lib/theme/roles";
+import { defaultTmuxConfig } from "@/lib/tmux/config";
+
+const tmuxDemo = defaultTmuxConfig(PRESETS[0]);
+
+const FEATURES = [
+  {
+    title: "Click the code, not a list",
+    body: "Every token in the preview is a hit target. Click a keyword, change the keyword color. Selecting a role lights up everywhere it appears.",
+  },
+  {
+    title: "Colors that behave",
+    body: "Palettes are generated in OKLCh, so “a bit lighter” means the same thing on yellow as on blue. Shuffle gives you a coherent theme, not confetti.",
+  },
+  {
+    title: "Contrast you can defend",
+    body: "Live WCAG ratios for every role against the canvas, and one button that lifts the failing ones without touching their hue.",
+  },
+  {
+    title: "Nothing leaves the tab",
+    body: "No account, no upload, no analytics. Your theme lives in the URL fragment and in local storage — share a link and the whole palette rides along.",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <>
+      <SiteNav />
+
+      <main className="flex-1">
+        {/* hero */}
+        <section className="relative overflow-hidden border-b border-line">
+          <div className="dotfield pointer-events-none absolute inset-0 opacity-[0.35] [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />
+          <div className="relative mx-auto w-full max-w-6xl px-5 pt-16 pb-14 sm:pt-24">
+            <div className="animate-rise mx-auto max-w-2xl text-center">
+              <p className="label mb-5">No account · Nothing uploaded · Just colors</p>
+              <h1 className="text-balance text-4xl leading-[1.05] font-medium tracking-tight sm:text-6xl">
+                Build the theme you
+                <br className="hidden sm:block" /> actually want to look at.
+              </h1>
+              <p className="mx-auto mt-5 max-w-xl text-balance text-[15px] leading-relaxed text-ink-dim">
+                A visual editor for syntax colors. Tune all {ROLE_IDS.length} roles
+                against real code, then copy a finished config for VS Code, Neovim,
+                Vim, Emacs, tmux, or your terminal.
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-2.5">
+                <Link href="/editor" className="btn btn-primary px-4 py-2.5 text-sm">
+                  Open the theme editor
+                </Link>
+                <Link href="/tmux" className="btn px-4 py-2.5 text-sm">
+                  tmux studio
+                </Link>
+              </div>
+            </div>
+
+            <div className="animate-rise mt-14 [animation-delay:120ms]">
+              <HeroPreview />
+            </div>
+          </div>
+        </section>
+
+        {/* two tools */}
+        <section className="mx-auto w-full max-w-6xl px-5 py-16">
+          <h2 className="label">Two tools</h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <Link
+              href="/editor"
+              className="panel group flex flex-col overflow-hidden transition-colors hover:border-[color-mix(in_oklab,var(--accent)_45%,var(--color-line))]"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <div className="flex flex-1 flex-col gap-2 p-6">
+                <h3 className="text-lg font-medium tracking-tight">Theme editor</h3>
+                <p className="text-sm leading-relaxed text-ink-dim">
+                  Six languages of live preview, a full editor mock-up with tabs and
+                  a status line, an ANSI terminal, and one-click export to ten
+                  targets.
+                </p>
+                <span className="mt-3 font-mono text-[11px] text-ink-faint transition-colors group-hover:text-[var(--accent)]">
+                  Open editor →
+                </span>
+              </div>
+              <div className="grid grid-cols-8">
+                {PRESETS.slice(0, 4).flatMap((p) =>
+                  (["keyword", "string"] as const).map((role) => (
+                    <span
+                      key={`${p.name}-${role}`}
+                      className="h-1.5"
+                      style={{ background: p.colors[role] }}
+                    />
+                  )),
+                )}
+              </div>
+            </Link>
+
+            <Link
+              href="/tmux"
+              className="panel group flex flex-col overflow-hidden transition-colors hover:border-[color-mix(in_oklab,var(--accent)_45%,var(--color-line))]"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              <div className="flex flex-1 flex-col gap-2 p-6">
+                <h3 className="text-lg font-medium tracking-tight">tmux studio</h3>
+                <p className="text-sm leading-relaxed text-ink-dim">
+                  Drag your status bar into shape — segments, powerline separators,
+                  pane borders, prefix key — and watch a live terminal redraw as you
+                  go. Out comes a complete <code className="font-mono">.tmux.conf</code>.
+                </p>
+                <span className="mt-3 font-mono text-[11px] text-ink-faint transition-colors group-hover:text-[var(--accent)]">
+                  Open tmux studio →
+                </span>
+              </div>
+              <div className="border-t border-line">
+                <TmuxStatusBar config={tmuxDemo} fontSize={11} />
+              </div>
+            </Link>
+          </div>
+        </section>
+
+        {/* targets */}
+        <section className="border-y border-line bg-surface/40">
+          <div className="mx-auto w-full max-w-6xl px-5 py-12">
+            <h2 className="label">Exports to</h2>
+            <ul className="mt-5 flex flex-wrap gap-x-8 gap-y-3">
+              {TARGETS.map((t) => (
+                <li key={t.id} className="text-lg font-medium tracking-tight text-ink-dim">
+                  {t.label}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-faint">
+              Not a color list — a real config. Workbench chrome and semantic tokens
+              for VS Code, treesitter and LSP groups for Neovim, cterm fallbacks for
+              Vim, font-lock and org faces for Emacs, with install steps for each.
+            </p>
+          </div>
+        </section>
+
+        {/* features */}
+        <section className="mx-auto w-full max-w-6xl px-5 py-16">
+          <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+            {FEATURES.map((f, i) => (
+              <div key={f.title} className="flex gap-4">
+                <span className="mt-1 font-mono text-[11px] text-ink-faint">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 className="text-[15px] font-medium">{f.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink-dim">{f.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* closing */}
+        <section className="mx-auto w-full max-w-6xl px-5 pb-20">
+          <div className="panel flex flex-col items-center gap-4 px-6 py-12 text-center">
+            <h2 className="text-balance text-2xl font-medium tracking-tight sm:text-3xl">
+              Your editor, in your colors, in about five minutes.
+            </h2>
+            <div className="flex flex-wrap justify-center gap-2.5">
+              <Link href="/editor" className="btn btn-primary px-4 py-2.5 text-sm">
+                Start with a preset
+              </Link>
+              <Link href="/tmux" className="btn px-4 py-2.5 text-sm">
+                Configure tmux
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
-    </div>
+
+      <SiteFooter />
+    </>
   );
 }

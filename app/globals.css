@@ -1,26 +1,215 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Site chrome. Deliberately near-neutral so the theme being edited is the
+     only saturated thing on screen. */
+  --color-canvas: #06070a;
+  --color-surface: #0a0c11;
+  --color-raised: #10131a;
+  --color-sunken: #040507;
+  --color-line: #1c2029;
+  --color-line-soft: #14171d;
+  --color-ink: #e9ebf1;
+  --color-ink-dim: #98a0b0;
+  --color-ink-faint: #5f6779;
+
+  --radius-panel: 0.75rem;
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Overwritten at runtime with the accent of the theme you're editing. */
+  --accent: #b48ef0;
+  --accent-contrast: #06070a;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 32%, transparent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Thin, unobtrusive scrollbars — the app has a lot of scrollable panes. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: #2a3040;
+    background-clip: content-box;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .panel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-panel);
+  }
+
+  /* Small uppercase section labels used throughout the UI. */
+  .label {
+    font-family: var(--font-mono), monospace;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-line);
+    background-color: var(--color-raised);
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8125rem;
+    color: var(--color-ink);
+    transition:
+      background-color 140ms var(--ease-out-quart),
+      border-color 140ms var(--ease-out-quart),
+      color 140ms var(--ease-out-quart);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background-color: #171b24;
+    border-color: #2a3040;
+  }
+  .btn:active {
+    transform: translateY(0.5px);
+  }
+  .btn-primary {
+    background-color: var(--accent);
+    border-color: transparent;
+    color: var(--accent-contrast);
+    font-weight: 500;
+  }
+  .btn-primary:hover {
+    background-color: color-mix(in oklab, var(--accent) 88%, white);
+    border-color: transparent;
+  }
+  .btn-ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--color-ink-dim);
+  }
+  .btn-ghost:hover {
+    background-color: var(--color-raised);
+    border-color: var(--color-line);
+    color: var(--color-ink);
+  }
+
+  /* A clickable token in the code preview. Hover reveals it's editable;
+     data-active marks every token sharing the selected role. */
+  .tok {
+    border-radius: 2px;
+    cursor: pointer;
+    transition: box-shadow 120ms var(--ease-out-quart);
+  }
+  .tok:hover {
+    box-shadow: inset 0 -1.5px 0 currentColor;
+  }
+  .tok[data-active] {
+    background: color-mix(in oklab, currentColor 16%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, currentColor 45%, transparent);
+  }
+
+  /* Faint dotted field used behind hero sections. */
+  .dotfield {
+    background-image: radial-gradient(
+      circle at center,
+      var(--color-line) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .animate-rise {
+    animation: rise 600ms var(--ease-out-quart) both;
+  }
+  .animate-fade {
+    animation: fade 500ms var(--ease-out-quart) both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-fade {
+    animation: none;
+  }
+  * {
+    transition-duration: 1ms !important;
+  }
 }
