@@ -26,17 +26,32 @@ There are two tools.
 
 ### Theme editor
 
-<img src="docs/editor.png" alt="The themephile theme editor" width="100%">
+<img src="docs/editor.png" alt="The themephile theme editor, previewing a theme as Neovim" width="100%">
 
 Every token in the preview is a hit target. Click a keyword, edit the keyword
-color. Select a role and it lights up everywhere it appears — in the code, in
-the fake editor chrome, in the terminal.
+color. Select a role and it lights up everywhere it appears — in the code, in the
+chrome, in the terminal.
+
+**Five previews, one theme.** A colorscheme doesn't look the same in every
+program, so the preview switches between them and draws each as itself:
+
+| Preview | What it shows |
+| --- | --- |
+| **VS Code** | Activity bar, explorer with git letters, tabs, breadcrumbs, a live minimap, status bar |
+| **Neovim** | Relative line numbers, sign column with git and diagnostic signs, inline virtual text, a floating `Pmenu`, powerline statusline |
+| **Vim** | `~` filler past the buffer (visible, unlike Neovim's hidden `EndOfBuffer`), line-wise visual selection, plain statusline, `-- INSERT --` |
+| **Emacs** | Fringes, region highlight, the boxed modeline in its real `-UUU:----F1` format, and the echo area |
+| **Terminal** | Tab bar, `ls --color`, git status, a search match, a selection, test output, and normal-against-bright rows — plus a clickable ANSI 16 grid |
 
 - **48 editable roles** — editor surface, 16 syntax roles, diagnostics, and the ANSI 16
 - **Six languages** live-previewed: TypeScript/JSX, Python, Rust, Go, Lua, CSS
 - **Shuffle** builds a whole coherent theme from a seed — hue, harmony scheme, chroma
 - **Fix contrast** counts the roles failing WCAG AA-large and lifts them without touching hue
 - Undo, eyedropper, live contrast ratios, and a share link that carries the entire palette
+
+Opening **Export** lands on whichever program you're previewing.
+
+<img src="docs/terminal.png" alt="The terminal preview, with a clickable ANSI palette" width="100%">
 
 ### tmux studio
 
@@ -128,10 +143,18 @@ lib/
   export/             one module per target + the shared Vim/Neovim group table
   tmux/               config model and .tmux.conf generator
 components/
-  preview/            code surface, editor chrome, terminal mock
+  preview/
+    CodeSurface.tsx   the syntax-highlighted buffer, with per-editor gutters
+    PreviewStage.tsx  the target switcher
+    chrome/           one component per program: VS Code, Neovim, Vim, Emacs, Terminal
   editor/             role list, inspector, color picker, export dialog
   tmux/               status bar, terminal preview, controls
 ```
+
+Adding a sixth preview means writing one `chrome/` component against the shared
+`ChromeProps` and adding a row to `PREVIEW_TARGETS`. `CodeSurface` already
+handles relative line numbers, sign columns, virtual text, selections, search
+matches, and buffer filler, so most of the work is layout.
 
 Both workspaces read browser state during their first render, so they mount with
 `ssr: false` behind a prerendered skeleton — the static shell ships instantly and
