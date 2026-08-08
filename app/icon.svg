@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>themephile</title>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a7bfff">
+        <animate
+          attributeName="stop-color"
+          dur="12s"
+          repeatCount="indefinite"
+          values="#a7bfff;#f399ff;#77da95;#01d8f9;#bcb7ff;#a7bfff"
+          calcMode="spline"
+          keyTimes="0;0.2;0.4;0.6;0.8;1"
+          keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1" />
+      </stop>
+      <stop offset="1" stop-color="#fe9bbd">
+        <animate
+          attributeName="stop-color"
+          dur="12s"
+          repeatCount="indefinite"
+          values="#fe9bbd;#ffbe83;#83cdff;#dbbc47;#7feb7a;#fe9bbd"
+          calcMode="spline"
+          keyTimes="0;0.2;0.4;0.6;0.8;1"
+          keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1" />
+      </stop>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="20" ry="20" fill="url(#g)" />
+</svg>
