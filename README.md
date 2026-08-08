@@ -1,47 +1,125 @@
-# themephile.dev
+<div align="center">
 
-A visual theme editor for code, with no account and no server. Tune every
-syntax color against real code, then copy a finished config for your editor,
-your terminal, or tmux.
+<img src="docs/logo.svg" alt="themephile" width="104" height="104">
 
-Two tools:
+# themephile
 
-- **`/editor`** — 48 editable roles (editor chrome, syntax, diagnostics, ANSI 16)
-  previewed across six languages, plus a mock editor UI and a terminal session.
-  Exports to VS Code, Neovim, Vim, Emacs, Alacritty, kitty, Ghostty, WezTerm,
-  Windows Terminal, and raw JSON.
-- **`/tmux`** — a visual status-bar builder (segments, powerline separators,
-  pane borders, prefix key, vi bindings) with a live terminal preview. Exports a
-  complete `.tmux.conf`.
+**A visual theme editor for code — and a tmux status bar builder.**
+Tune every syntax color against real code, then copy a finished config
+for your editor, your terminal, or tmux. No account. Nothing uploaded.
 
-Everything runs in the browser. A theme is persisted to `localStorage` and
-encoded into the URL fragment, so sharing a link shares the whole palette —
-nothing is ever uploaded.
+[![License: MIT](https://img.shields.io/badge/license-MIT-a7bfff.svg?style=flat-square)](LICENSE)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16-fe9bbd.svg?style=flat-square)](https://nextjs.org)
+[![No tracking](https://img.shields.io/badge/tracking-none-aedf89.svg?style=flat-square)](#privacy)
 
-## Development
+</div>
+
+---
+
+## What it is
+
+Most theme editors want an account before they'll let you pick a shade of blue.
+This one doesn't have a backend to sign into. Everything — the palette
+generator, the syntax highlighter, all ten exporters — runs in your browser.
+
+There are two tools.
+
+### Theme editor
+
+<img src="docs/editor.png" alt="The themephile theme editor" width="100%">
+
+Every token in the preview is a hit target. Click a keyword, edit the keyword
+color. Select a role and it lights up everywhere it appears — in the code, in
+the fake editor chrome, in the terminal.
+
+- **48 editable roles** — editor surface, 16 syntax roles, diagnostics, and the ANSI 16
+- **Six languages** live-previewed: TypeScript/JSX, Python, Rust, Go, Lua, CSS
+- **Shuffle** builds a whole coherent theme from a seed — hue, harmony scheme, chroma
+- **Fix contrast** counts the roles failing WCAG AA-large and lifts them without touching hue
+- Undo, eyedropper, live contrast ratios, and a share link that carries the entire palette
+
+### tmux studio
+
+<img src="docs/tmux.png" alt="The themephile tmux studio" width="100%">
+
+Build your status bar by looking at it: reorder segments, switch separators,
+set pane borders and the prefix key, and watch a live terminal redraw. Out comes
+a complete `.tmux.conf`.
+
+Browsers have no Nerd Font, so the preview draws powerline separators as CSS
+shapes — identical silhouette, no tofu — while the exported config uses the real
+`U+E0B0` glyphs.
+
+## Exports
+
+| Target | What you get |
+| --- | --- |
+| **VS Code** | Workbench chrome, TextMate scopes, semantic tokens, plus a `package.json` so it installs as a local extension. Works in Cursor and Windsurf. |
+| **Neovim** | Lua colorscheme with treesitter captures, LSP semantic tokens, diagnostics, and groups for gitsigns / telescope / nvim-tree / cmp. |
+| **Vim** | Classic vimscript with 256-color `cterm` fallbacks, so it survives SSH. |
+| **Emacs** | `deftheme` covering font-lock (including the Emacs 29+ tree-sitter faces), org, diffs, and completion popups. |
+| **Terminals** | Alacritty, kitty, Ghostty, WezTerm, Windows Terminal. |
+| **tmux** | A full `.tmux.conf` — status bar, panes, messages, key bindings. |
+| **JSON** | Every role as flat, stable keys, for writing your own exporter. |
+
+Each one ships with install steps: where the file goes and what to type.
+
+## Quick start
 
 ```bash
 bun install
-bun dev        # http://localhost:3000
-bun run build  # production build
+bun dev          # http://localhost:3000
+```
+
+```bash
+bun run build    # production build
+bun run start
 bun run lint
 ```
 
 Next.js 16 (App Router), React 19, Tailwind CSS v4. No runtime dependencies
-beyond those — the syntax highlighter, color math, and every exporter are local.
+beyond those — the syntax highlighter, the color math, and every exporter are
+local code.
+
+## Privacy
+
+There is no server to send anything to. Your theme is saved to `localStorage`
+and encoded into the URL fragment, so sharing a link shares the whole palette
+without a database. No accounts, no analytics, no telemetry.
+
+## How it works
+
+**One vocabulary, many targets.** Every editor names things differently — VS
+Code has TextMate scopes, Neovim has treesitter captures, Emacs has font-lock
+faces. themephile defines 48 neutral *roles* in the middle, and each exporter
+translates from those. Pick a color once; it lands everywhere.
+
+**Palettes are generated, not hand-picked.** A theme comes from a small seed —
+a background, a foreground, a base hue, a harmony scheme, and a chroma
+multiplier — expanded in OKLCh. Because the math is perceptual, "10% lighter"
+means the same thing on yellow as it does on blue, and Shuffle produces coherent
+themes instead of confetti. Every derived color stays editable.
+
+**The highlighter is custom on purpose.** Off-the-shelf highlighters emit
+TextMate scopes, and collapsing ~2000 scopes onto 16 editable roles is guesswork
+in the wrong direction. Here each token is *born* as a role, which is what makes
+clicking a token in the preview and clicking its swatch the same action. It's
+approximate — there's no parser — but it only has to be convincing enough to
+judge a color by.
 
 ## Layout
 
 ```
 app/
   page.tsx            landing
-  editor/page.tsx     theme editor      → components/editor/EditorApp
-  tmux/page.tsx       tmux studio       → components/tmux/TmuxApp
+  editor/page.tsx     theme editor    → components/editor/EditorApp
+  tmux/page.tsx       tmux studio     → components/tmux/TmuxApp
+  icon.svg            the animated favicon
 lib/
   color.ts            OKLab/OKLCh conversion, WCAG contrast, xterm-256 matching
   theme/
     roles.ts          the 48 role ids — the vocabulary every exporter maps from
-    theme.ts          seed → full theme generator, contrast repair
+    theme.ts          seed → theme generator, contrast repair
     presets.ts        starting seeds
     serialize.ts      URL-fragment encoding, localStorage, downloads
   highlight/
@@ -55,31 +133,32 @@ components/
   tmux/               status bar, terminal preview, controls
 ```
 
-Both workspaces read browser state during their first render, so they are
-loaded with `ssr: false` behind a skeleton — the static shell prerenders, and
+Both workspaces read browser state during their first render, so they mount with
+`ssr: false` behind a prerendered skeleton — the static shell ships instantly and
 there's no flash of the default theme before your saved one appears.
 
-### Why a custom tokenizer
-
-Off-the-shelf highlighters emit TextMate scopes, and collapsing ~2000 scopes
-onto 16 editable roles is guesswork in the wrong direction. Here each token is
-*born* as a role, so clicking a token in the preview and clicking its swatch in
-the sidebar are the same action. It's approximate — there's no parser — but it
-only has to be convincing enough to judge a color by.
-
-### Adding an export target
+## Adding an export target
 
 Implement `ExportTarget` (`lib/export/types.ts`) — an id, a label, a `files()`
-that returns one or more `{ filename, language, contents }`, and `install()`
-steps — then add it to `TARGETS` in `lib/export/index.ts`. The export dialog,
-the landing page list, and the download buttons pick it up automatically.
+returning one or more `{ filename, language, contents }`, and `install()` steps —
+then add it to `TARGETS` in `lib/export/index.ts`. The export dialog, the landing
+page list, and the download buttons pick it up automatically.
 
-Vim and Neovim share their highlight-group table (`lib/export/groups.ts`) so the
+Vim and Neovim share one highlight-group table (`lib/export/groups.ts`) so the
 two colorschemes can't drift apart.
 
 ## Verification
 
 The generated configs are checked against the real programs, not just eyeballed:
 the Emacs theme loads under `emacs --batch`, the Vim colorscheme sources under
-`vim -es -u NONE`, and every `.tmux.conf` variant boots a real `tmux` server
-with no errors.
+`vim -es -u NONE`, and every `.tmux.conf` variant boots a real `tmux` server with
+no errors.
+
+## Contributing
+
+Issues and pull requests are welcome. New export targets, new preset seeds, and
+tokenizer fixes for languages that look wrong are all good places to start.
+
+## License
+
+[MIT](LICENSE) © justin06lee
