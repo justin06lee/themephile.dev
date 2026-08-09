@@ -130,7 +130,15 @@ app/
   editor/page.tsx     theme editor    → components/editor/EditorApp
   tmux/page.tsx       tmux studio     → components/tmux/TmuxApp
   icon.svg            the animated favicon
+  apple-icon.tsx      iOS home-screen icon (iOS won't take an SVG)
+  opengraph-image.tsx social card, one per route, generated from the real palette
+  sitemap.ts          three static routes
+  robots.ts           allow-all + sitemap pointer
+  llms.txt/route.ts   derived from TARGETS/ROLE_IDS, so it can't describe a
+                      product that no longer exists
 lib/
+  site.ts             canonical origin + shared OpenGraph fields
+  seo/                JSON-LD graph, social-card renderer
   color.ts            OKLab/OKLCh conversion, WCAG contrast, xterm-256 matching
   theme/
     roles.ts          the 48 role ids — the vocabulary every exporter maps from

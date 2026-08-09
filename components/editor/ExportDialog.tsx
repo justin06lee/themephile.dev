@@ -65,7 +65,7 @@ export function ExportDialog({
             className="btn btn-ghost ml-auto shrink-0 px-2"
             aria-label="Close export dialog"
           >
-            <svg viewBox="0 0 16 16" className="size-4" stroke="currentColor" strokeWidth="1.5">
+            <svg aria-hidden viewBox="0 0 16 16" className="size-4" stroke="currentColor" strokeWidth="1.5">
               <path d="M4 4l8 8M12 4l-8 8" />
             </svg>
           </button>

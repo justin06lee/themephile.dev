@@ -47,7 +47,7 @@ export function CopyButton({
     >
       {copied ? (
         <>
-          <svg viewBox="0 0 16 16" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <svg aria-hidden viewBox="0 0 16 16" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.8">
             <path d="M3.5 8.5l3 3 6-7" />
           </svg>
           Copied

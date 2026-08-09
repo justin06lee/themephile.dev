@@ -529,7 +529,7 @@ function PaletteMenu({
         aria-expanded={open}
       >
         {current}
-        <svg viewBox="0 0 12 12" className="size-3 opacity-60" fill="currentColor">
+        <svg aria-hidden viewBox="0 0 12 12" className="size-3 opacity-60" fill="currentColor">
           <path d="M2.5 4.5L6 8l3.5-3.5z" />
         </svg>
       </button>
