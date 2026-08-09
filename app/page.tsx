@@ -3,8 +3,9 @@ import { HeroPreview } from "@/components/site/HeroPreview";
 import { SiteFooter, SiteNav } from "@/components/site/SiteNav";
 import { TmuxStatusBar } from "@/components/tmux/TmuxStatusBar";
 import { TARGETS } from "@/lib/export";
-import { PRESETS } from "@/lib/theme/presets";
+import { PRESET_SEEDS, PRESETS } from "@/lib/theme/presets";
 import { ROLE_IDS } from "@/lib/theme/roles";
+import { REPO_URL } from "@/lib/site";
 import { defaultTmuxConfig } from "@/lib/tmux/config";
 
 const tmuxDemo = defaultTmuxConfig(PRESETS[0]);
@@ -49,13 +50,15 @@ export default function Home() {
             <div className="animate-rise mx-auto max-w-2xl text-center">
               <p className="label mb-5">No account · Nothing uploaded · Just colors</p>
               <h1 className="text-balance text-4xl leading-[1.05] font-medium tracking-tight sm:text-6xl">
-                Build the theme you
+                Build the editor theme you
                 <br className="hidden sm:block" /> actually want to look at.
               </h1>
               <p className="mx-auto mt-5 max-w-xl text-balance text-[15px] leading-relaxed text-ink-dim">
-                A visual editor for syntax colors. Tune all {ROLE_IDS.length} roles
-                against real code, then copy a finished config for VS Code, Neovim,
-                Vim, Emacs, tmux, or your terminal.
+                themephile is a free, open-source theme editor for code. Tune all{" "}
+                {ROLE_IDS.length} syntax roles against live previews of VS Code,
+                Neovim, Vim, Emacs, and a terminal, then copy a finished config for
+                your editor, your terminal, or tmux. No account, nothing uploaded —
+                it all runs in your browser.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-2.5">
                 <Link href="/editor" className="btn btn-primary px-4 py-2.5 text-sm">
@@ -73,9 +76,43 @@ export default function Home() {
           </div>
         </section>
 
+        {/* what it is — the passage designed to be quoted whole */}
+        <section className="border-b border-line">
+          <div className="mx-auto w-full max-w-3xl px-5 py-14">
+            <h2 className="text-balance text-2xl font-medium tracking-tight">
+              What is themephile?
+            </h2>
+            <div className="mt-4 space-y-4 text-[15px] leading-relaxed text-ink-dim">
+              <p>
+                themephile is a free, open-source theme editor for code, released
+                under the MIT license. It&rsquo;s for developers who&rsquo;d rather
+                build their own colorscheme than install someone else&rsquo;s
+                &mdash; and it runs entirely in your browser, with no account, no
+                backend, and nothing uploaded.
+              </p>
+              <p>
+                Start from one of {PRESET_SEEDS.length} presets, then tune all{" "}
+                {ROLE_IDS.length} color roles &mdash; editor chrome, 16 syntax
+                roles, 4 diagnostics, and the ANSI 16 &mdash; against live previews
+                of VS Code, Neovim, Vim, Emacs, and a terminal, each drawn as the
+                real program. Every token in the preview is clickable: you change a
+                color by clicking the thing you want to change.
+              </p>
+              <p>
+                Export writes a finished config with install steps &mdash; a VS Code
+                extension, a Neovim Lua colorscheme, a Vim colorscheme with cterm
+                fallbacks, an Emacs <code className="font-mono">deftheme</code>,
+                terminal configs for Alacritty, kitty, Ghostty, WezTerm, and Windows
+                Terminal, or raw JSON. The tmux studio writes a complete{" "}
+                <code className="font-mono">.tmux.conf</code>.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* two tools */}
         <section className="mx-auto w-full max-w-6xl px-5 py-16">
-          <h2 className="label">Two tools</h2>
+          <h2 className="label">Which tool do you need?</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <Link
               href="/editor"
@@ -130,7 +167,7 @@ export default function Home() {
         {/* targets */}
         <section className="border-y border-line bg-surface/40">
           <div className="mx-auto w-full max-w-6xl px-5 py-12">
-            <h2 className="label">Exports to</h2>
+            <h2 className="label">What does themephile export?</h2>
             <ul className="mt-5 flex flex-wrap gap-x-8 gap-y-3">
               {TARGETS.map((t) => (
                 <li key={t.id} className="text-lg font-medium tracking-tight text-ink-dim">
@@ -146,9 +183,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* features */}
+        {/* features — these h3s previously dangled under "Exports to" with no
+            h2 of their own, so the hierarchy skipped a level */}
         <section className="mx-auto w-full max-w-6xl px-5 py-16">
-          <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+          <h2 className="label">What you get</h2>
+          <div className="mt-8 grid gap-x-10 gap-y-8 sm:grid-cols-2">
             {FEATURES.map((f, i) => (
               <div key={f.title} className="flex gap-4">
                 <span className="mt-1 font-mono text-[11px] text-ink-faint">
@@ -160,6 +199,45 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* how it's built — the Who/How/Why evidence, which until now existed
+            only in the README where the domain earns nothing from it */}
+        <section className="mx-auto w-full max-w-6xl px-5 pb-16">
+          <h2 className="label">How it&apos;s built</h2>
+          <div className="mt-8 grid gap-x-10 gap-y-8 sm:grid-cols-2">
+            <div>
+              <h3 className="text-[15px] font-medium">
+                Checked against the real programs
+              </h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink-dim">
+                The generated configs aren&apos;t just eyeballed in a preview. The
+                Emacs theme has to load under{" "}
+                <code className="font-mono text-[13px]">emacs --batch</code>, the Vim
+                colorscheme has to source under{" "}
+                <code className="font-mono text-[13px]">vim -es -u NONE</code>, and
+                every exported{" "}
+                <code className="font-mono text-[13px]">.tmux.conf</code> has to boot
+                a real tmux server without errors.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-[15px] font-medium">What it doesn&apos;t do</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-ink-dim">
+                There is no sign-up, no upload, no analytics, and no server to send a
+                theme to — the palette generator, the highlighter, and all{" "}
+                {TARGETS.length} exporters are code that runs in your tab. The whole
+                thing is{" "}
+                <a
+                  href={REPO_URL}
+                  className="underline underline-offset-4 transition-colors hover:text-ink"
+                >
+                  open source under the MIT license
+                </a>
+                , so you can check that for yourself.
+              </p>
+            </div>
           </div>
         </section>
 

@@ -256,7 +256,7 @@ function EyeDropperButton({ onPick }: { onPick: (hex: string) => void }) {
         }
       }}
     >
-      <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.3">
+      <svg aria-hidden viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.3">
         <path d="M10.5 2.5a1.8 1.8 0 0 1 2.6 2.5l-1.3 1.3 1 1-1.2 1.2-1-1L5.9 13H3v-2.9l6.5-6.5-1-1L9.7 1.4l1 1z" />
       </svg>
     </button>

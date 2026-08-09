@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LICENSE_URL, REPO_URL } from "@/lib/site";
 
 export function SiteNav() {
   return (
@@ -36,13 +37,22 @@ export function SiteFooter() {
           Everything runs in your browser. No account, no tracking, nothing
           uploaded — your theme lives in the URL and in local storage.
         </p>
-        <div className="flex gap-4 sm:ml-auto">
+        {/* Anchor text matches each destination's h1. The repo and license are
+            the site's only externally verifiable trust signals, and they lived
+            only in the README, where they earn the domain nothing. */}
+        <div className="flex flex-wrap gap-4 sm:ml-auto">
           <Link href="/editor" className="transition-colors hover:text-ink">
-            Editor
+            Theme editor
           </Link>
           <Link href="/tmux" className="transition-colors hover:text-ink">
-            tmux
+            tmux studio
           </Link>
+          <a href={REPO_URL} className="transition-colors hover:text-ink">
+            Source on GitHub
+          </a>
+          <a href={LICENSE_URL} className="transition-colors hover:text-ink">
+            MIT license
+          </a>
         </div>
       </div>
     </footer>

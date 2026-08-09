@@ -56,6 +56,11 @@ export function Toolbar({ theme, onCommit, onUndo, canUndo, onExport }: Props) {
 
       <div className="mx-1 hidden h-5 w-px bg-line sm:block" />
 
+      {/* Mirrors the skeleton's h1 so the heading survives hydration, and
+          mirrors TmuxWorkspace, which already does this. Deliberately not
+          `hidden sm:block`: Googlebot renders at a mobile viewport. */}
+      <h1 className="shrink-0 text-sm font-medium">Theme editor</h1>
+
       <input
         value={theme.name}
         onChange={(e) => onCommit({ ...theme, name: e.target.value })}
@@ -115,6 +120,11 @@ export function Toolbar({ theme, onCommit, onUndo, canUndo, onExport }: Props) {
           Undo
         </button>
 
+        {/* /tmux already links back here ("Edit palette"); this closes the loop. */}
+        <Link href="/tmux" className="btn text-xs" title="Build a matching tmux status bar">
+          tmux studio
+        </Link>
+
         <button className="btn text-xs" onClick={share}>
           {shared ? "Link copied" : "Share"}
         </button>
@@ -154,7 +164,7 @@ function PresetMenu({ onPick }: { onPick: (seed: ThemeSeed) => void }) {
         aria-haspopup="menu"
       >
         Presets
-        <svg viewBox="0 0 12 12" className="size-3 opacity-60" fill="currentColor">
+        <svg aria-hidden viewBox="0 0 12 12" className="size-3 opacity-60" fill="currentColor">
           <path d="M2.5 4.5L6 8l3.5-3.5z" />
         </svg>
       </button>

@@ -33,7 +33,10 @@ export function Hit({
         ...style,
         ...(active ? { boxShadow: "inset 0 0 0 1px currentColor" } : null),
       }}
-      title={title ?? role}
+      // The role id is a useful hint where the region is editable. On the
+      // landing page's non-interactive preview it's just internal vocabulary
+      // leaking as a tooltip — and `title` is read as an accessible description.
+      title={onPick ? (title ?? role) : title}
       onClick={
         onPick
           ? (e: React.MouseEvent) => {

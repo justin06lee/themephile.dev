@@ -55,6 +55,7 @@ export function VsCodeChrome({
                 />
               )}
               <svg
+                aria-hidden
                 viewBox="0 0 24 24"
                 className="size-[18px]"
                 fill="none"
