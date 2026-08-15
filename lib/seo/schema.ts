@@ -1,3 +1,4 @@
+import type { GalleryTheme } from "@/lib/gallery/theme";
 import type { JsonLdGraph, JsonLdNode } from "@/components/seo/JsonLd";
 import { AUTHOR_URL, LICENSE_URL, REPO_URL, SITE_URL } from "@/lib/site";
 
@@ -140,5 +141,99 @@ export const tmuxGraph: JsonLdGraph = {
     breadcrumb("/tmux", "tmux studio"),
   ],
 };
+
+/* -------------------------------------------------------------------------- */
+/*                                  gallery                                   */
+/* -------------------------------------------------------------------------- */
+
+export function galleryGraph(themes: GalleryTheme[], total: number): JsonLdGraph {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${SITE_URL}/themes#page`,
+        url: `${SITE_URL}/themes`,
+        name: "Theme gallery",
+        description:
+          "Colorschemes published by the community. Open any of them in the editor, change what you want, and export to your editor or terminal.",
+        inLanguage: "en",
+        isAccessibleForFree: true,
+        isPartOf: { "@id": WEBSITE_ID },
+        mainEntity: {
+          "@type": "ItemList",
+          numberOfItems: total,
+          itemListElement: themes.map((theme, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            url: `${SITE_URL}/themes/${theme.slug}`,
+            name: theme.name,
+          })),
+        },
+      },
+      breadcrumb("/themes", "Theme gallery"),
+    ],
+  };
+}
+
+/**
+ * A published theme is a `CreativeWork` by the person who published it — not by
+ * us, and not a `SoftwareApplication`. `interactionStatistic` carries the real
+ * like count; it is a genuine first-party number, unlike an `aggregateRating`,
+ * which we still do not have and still will not invent.
+ */
+export function themeGraph(theme: GalleryTheme): JsonLdGraph {
+  const url = `${SITE_URL}/themes/${theme.slug}`;
+  const authorId = `https://github.com/${theme.author.username}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        "@id": `${url}#theme`,
+        url,
+        name: theme.name,
+        ...(theme.blurb ? { description: theme.blurb } : {}),
+        datePublished: theme.createdAt,
+        inLanguage: "en",
+        isAccessibleForFree: true,
+        license: MIT,
+        genre: "Syntax colour scheme",
+        keywords: [
+          "colorscheme",
+          "syntax theme",
+          theme.appearance === "dark" ? "dark theme" : "light theme",
+        ],
+        author: {
+          "@type": "Person",
+          "@id": authorId,
+          name: theme.author.username,
+          url: authorId,
+        },
+        isPartOf: { "@id": WEBSITE_ID },
+        interactionStatistic: {
+          "@type": "InteractionCounter",
+          interactionType: "https://schema.org/LikeAction",
+          userInteractionCount: theme.likeCount,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${url}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "themephile", item: `${SITE_URL}/` },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Theme gallery",
+            item: `${SITE_URL}/themes`,
+          },
+          { "@type": "ListItem", position: 3, name: theme.name },
+        ],
+      },
+    ],
+  };
+}
 
 export { LICENSE_URL };

@@ -23,6 +23,12 @@ export function SiteNav() {
           >
             tmux studio
           </Link>
+          <Link
+            href="/themes"
+            className="rounded-md px-2.5 py-1.5 text-ink-dim transition-colors hover:bg-raised hover:text-ink"
+          >
+            Gallery
+          </Link>
         </div>
       </nav>
     </header>
@@ -33,9 +39,13 @@ export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-line">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-8 text-xs text-ink-faint sm:flex-row sm:items-center">
+        {/* This claim used to be unqualified, and the gallery made it only
+            mostly true. The editor is still account-free and offline; say
+            exactly where the line is rather than quietly softening it. */}
         <p>
-          Everything runs in your browser. No account, no tracking, nothing
-          uploaded — your theme lives in the URL and in local storage.
+          The editor runs entirely in your browser — no account, no tracking,
+          nothing uploaded. Your theme lives in the URL and in local storage.
+          Publishing to the gallery is the one thing that needs a sign-in.
         </p>
         {/* Anchor text matches each destination's h1. The repo and license are
             the site's only externally verifiable trust signals, and they lived
@@ -46,6 +56,9 @@ export function SiteFooter() {
           </Link>
           <Link href="/tmux" className="transition-colors hover:text-ink">
             tmux studio
+          </Link>
+          <Link href="/themes" className="transition-colors hover:text-ink">
+            Theme gallery
           </Link>
           <a href={REPO_URL} className="transition-colors hover:text-ink">
             Source on GitHub

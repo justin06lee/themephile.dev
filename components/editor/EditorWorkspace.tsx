@@ -19,6 +19,7 @@ import {
 import { setColor, type Theme } from "@/lib/theme/theme";
 import { ExportDialog } from "./ExportDialog";
 import { ImportDialog } from "./ImportDialog";
+import { PublishDialog } from "./PublishDialog";
 import { Inspector } from "./Inspector";
 import { RoleList } from "./RoleList";
 import { Toolbar } from "./Toolbar";
@@ -54,6 +55,7 @@ export function EditorWorkspace() {
   const [target, setTarget] = useState<PreviewTargetId>("vscode");
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
 
   // ── persist + keep the share link live ──
   useEffect(() => {
@@ -137,6 +139,7 @@ export function EditorWorkspace() {
         canUndo={history.length > 0}
         onExport={() => setExportOpen(true)}
         onImport={() => setImportOpen(true)}
+        onPublish={() => setPublishOpen(true)}
       />
 
       <main className="flex min-h-0 flex-1 flex-col lg:flex-row">
@@ -171,6 +174,12 @@ export function EditorWorkspace() {
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImport={commit}
+      />
+
+      <PublishDialog
+        theme={theme}
+        open={publishOpen}
+        onClose={() => setPublishOpen(false)}
       />
 
       {/* Keyed by target so opening Export lands on whatever you're previewing. */}

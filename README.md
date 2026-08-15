@@ -6,7 +6,7 @@
 
 **A visual theme editor for code — and a tmux status bar builder.**
 Tune every syntax color against real code, then copy a finished config
-for your editor, your terminal, or tmux. No account. Nothing uploaded.
+for your editor, your terminal, or tmux. The editor never asks you to sign in.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-a7bfff.svg?style=flat-square)](LICENSE)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-fe9bbd.svg?style=flat-square)](https://nextjs.org)
@@ -19,11 +19,16 @@ for your editor, your terminal, or tmux. No account. Nothing uploaded.
 ## What it is
 
 Most theme editors want an account before they'll let you pick a shade of blue.
-This one doesn't have a backend to sign into. Everything — the palette
-generator, the syntax highlighter, all ten exporters, and the importer that
-reads someone else's theme file — runs in your browser.
+This one doesn't ask. Everything that makes a theme — the palette generator,
+the syntax highlighter, all ten exporters, and the importer that reads someone
+else's theme file — runs in your browser, signed out, forever.
 
-There are two tools.
+There is a gallery, and it does have a database. The line is drawn at the point
+where you'd be writing to a space other people share: **reading is anonymous,
+writing needs an identity.** Browsing, opening, editing and exporting a
+published theme never involve an account. Publishing one, or liking one, does.
+
+There are three tools.
 
 ### Theme editor
 
@@ -81,6 +86,21 @@ the split — *"24 of 48 roles read from the file, 24 derived"* — and marks th
 derived swatches with a dashed outline, so nothing is presented as having come
 from your file when it didn't.
 
+### Theme gallery
+
+Published colorschemes, newest or most-liked, dark or light. Every card is a
+real preview — the tokenizer runs on the server and the result ships as plain
+HTML, so a gallery page carries no client-side rendering cost and a crawler
+reads the same code a person does.
+
+Opening one loads the whole palette from the URL fragment, so it lands in the
+editor without a lookup and works even if the original is later deleted. From
+there it's an ordinary theme: change what you want, export it, or publish your
+own version.
+
+Each theme gets its own page — every role, every hex code as real text — and
+its own social card painted in its own palette.
+
 ### tmux studio
 
 <img src="docs/tmux.png" alt="The themephile tmux studio" width="100%">
@@ -110,25 +130,44 @@ Each one ships with install steps: where the file goes and what to type.
 ## Quick start
 
 ```bash
-bun install
-bun dev          # http://localhost:3000
+make             # install, check the environment, start the dev server
 ```
+
+That's the whole golden path. The other targets:
 
 ```bash
-bun run build    # production build
-bun run start
-bun run lint
+make build       # production build
+make check       # tsc, eslint, and a build — what CI runs
+make types       # regenerate lib/supabase/database.types.ts from the live schema
+make update      # newest dependencies, fresh types, clean rebuild
 ```
 
-Next.js 16 (App Router), React 19, Tailwind CSS v4. No runtime dependencies
-beyond those — the syntax highlighter, the color math, and every exporter are
-local code.
+**The gallery is optional.** Without `.env.local` the editor and tmux studio
+work exactly as documented and `/themes` renders a "not configured" notice —
+you do not need to provision a database to hack on the editor. To enable it,
+copy `.env.example` to `.env.local` and fill in the two values from your own
+Supabase project.
+
+Next.js 16 (App Router), React 19, Tailwind CSS v4, and `@supabase/supabase-js`
+for the gallery alone. The syntax highlighter, the color math, every exporter
+and every importer are local code with no dependencies at all.
 
 ## Privacy
 
-There is no server to send anything to. Your theme is saved to `localStorage`
-and encoded into the URL fragment, so sharing a link shares the whole palette
-without a database. No accounts, no analytics, no telemetry.
+**The editor and tmux studio never talk to a server.** Your theme is saved to
+`localStorage` and encoded into the URL *fragment* — the part after `#`, which
+browsers do not transmit — so sharing a link shares the whole palette without
+anything touching a database. Importing reads the file in the tab; nothing is
+uploaded. No analytics, no telemetry, no cookies.
+
+**The gallery has a database**, and it would be dishonest to keep claiming
+otherwise. What it stores: for a theme, its 48 colors, a name, an optional
+one-line description, and who published it; for an account, only what GitHub
+hands over at sign-in — your handle and avatar URL. No email is used for
+anything, nothing is emailed, and deleting a theme deletes the row.
+
+You can use every other part of the site without ever creating an account, and
+nothing you do in the editor is visible to anyone until you press Publish.
 
 ## How it works
 
@@ -157,6 +196,8 @@ app/
   page.tsx            landing
   editor/page.tsx     theme editor    → components/editor/EditorApp
   tmux/page.tsx       tmux studio     → components/tmux/TmuxApp
+  themes/             gallery index and one page per published theme,
+                      each with a social card in its own palette
   icon.svg            the animated favicon
   apple-icon.tsx      iOS home-screen icon (iOS won't take an SVG)
   opengraph-image.tsx social card, one per route, generated from the real palette
@@ -179,13 +220,17 @@ lib/
   export/             one module per target + the shared Vim/Neovim group table
   import/             format sniffing, one parser per format, and the
                       derivation that grows a partial read into all 48 roles
+  supabase/           clients and generated types; `config.ts` is what makes
+                      the gallery optional
+  gallery/            queries and the palette <-> row conversion
   tmux/               config model and .tmux.conf generator
 components/
   preview/
     CodeSurface.tsx   the syntax-highlighted buffer, with per-editor gutters
     PreviewStage.tsx  the target switcher
     chrome/           one component per program: VS Code, Neovim, Vim, Emacs, Terminal
-  editor/             role list, inspector, color picker, export dialog
+  editor/             role list, inspector, color picker, export/import/publish
+  gallery/            cards, like button, auth button, session provider
   tmux/               status bar, terminal preview, controls
 ```
 
@@ -207,6 +252,39 @@ page list, and the download buttons pick it up automatically.
 
 Vim and Neovim share one highlight-group table (`lib/export/groups.ts`) so the
 two colorschemes can't drift apart.
+
+## How the gallery is built
+
+**Auth is client-side only, and that's a design decision rather than a
+shortcut.** Gallery pages are public content that renders identically for
+everyone, so they stay statically cacheable and fully crawlable; the only
+per-person state — whether *you* liked this one — hydrates afterwards. That
+also means no proxy hop on every request and no auth cookie for pages that
+don't need one. (In Next.js 16 the file would be `proxy.ts`, not
+`middleware.ts` — the convention was renamed.)
+
+**Postgres enforces the rules, not the client.** Three tables — `profiles`,
+`themes`, `likes` — with row-level security throughout: everything is
+world-readable, and you may only write rows that are yours.
+
+RLS alone isn't enough, though, because it decides which *rows* you may touch
+and not which *columns*. `like_count` is denormalized onto `themes` so "most
+liked" is an index scan, and an author legitimately owns that row — so
+column-level grants withhold `like_count` (and `slug`, and `author_id`) from
+`authenticated` entirely. The counter is maintained by a `SECURITY DEFINER`
+trigger on `likes`, which is the only thing that can write it.
+
+Two operations are RPCs because they have to be atomic. `publish_theme`
+allocates a slug by catching `unique_violation` and retrying — two people
+publishing "Nord" in the same second would both see the name as free, so a
+read-then-write from the client is a race by construction. `toggle_like`
+returns the resulting state so the client never has to guess whether its
+optimistic update was right. Both are `SECURITY INVOKER`: they're a
+convenience, not a privilege escalation.
+
+Palettes are validated in the database as well as in the client — RLS lets any
+signed-in user write here, and "authenticated" is not the same as
+"well-behaved".
 
 ## Verification
 

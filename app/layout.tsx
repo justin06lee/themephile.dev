@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SessionProvider } from "@/components/gallery/session";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { siteGraph } from "@/lib/seo/schema";
 import { AUTHOR_URL, openGraphBase, SITE_URL } from "@/lib/site";
@@ -68,7 +69,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col">
         <JsonLd id="ld-site" data={siteGraph} />
-        {children}
+        {/* Client boundary only — `children` stays a server subtree. One
+            provider for the whole app so the editor's Publish button and the
+            gallery's like buttons share a session and a single auth listener. */}
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );
