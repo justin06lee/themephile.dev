@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   // "Theme editor — themephile · themephile".
   title: "Free theme editor for VS Code, Neovim & Emacs",
   description:
-    "Pick colors for 48 syntax and UI roles against live VS Code, Neovim, Vim, Emacs and terminal previews, with WCAG contrast checks. Free, no account.",
+    "Import a VS Code, Neovim, Vim, Emacs, base16 or terminal theme — or start fresh. Edit 48 syntax and UI roles against live previews with WCAG contrast checks. Free, no account.",
   alternates: { canonical: "/editor" },
   openGraph: {
     // Spread required: setting `openGraph` replaces the layout's object whole.
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     url: "/editor",
     title: "themephile theme editor — VS Code, Neovim, Vim, Emacs",
     description:
-      "Tune 48 syntax roles against real code and copy a finished config. Runs in your browser, no account.",
+      "Import the theme you already use, tune 48 syntax roles against real code, and copy a finished config. Runs in your browser, no account.",
   },
 };
 

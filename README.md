@@ -20,7 +20,8 @@ for your editor, your terminal, or tmux. No account. Nothing uploaded.
 
 Most theme editors want an account before they'll let you pick a shade of blue.
 This one doesn't have a backend to sign into. Everything — the palette
-generator, the syntax highlighter, all ten exporters — runs in your browser.
+generator, the syntax highlighter, all ten exporters, and the importer that
+reads someone else's theme file — runs in your browser.
 
 There are two tools.
 
@@ -52,6 +53,33 @@ program, so the preview switches between them and draws each as itself:
 Opening **Export** lands on whichever program you're previewing.
 
 <img src="docs/terminal.png" alt="The terminal preview, with a clickable ANSI palette" width="100%">
+
+### Import a theme you already have
+
+**Import** takes the file two ways, because the formats split two ways. A VS
+Code theme is something you copy out of a gist; an `.itermcolors` is something
+you have on disk and have never once opened in an editor. So: paste it into the
+box, or drop the file anywhere on the dialog. Both run the same reader, in your
+browser.
+
+| Read | From |
+| --- | --- |
+| **VS Code** | Workbench colors, TextMate scopes, semantic tokens. Handles JSONC — comments and trailing commas — because real themes are full of both. |
+| **Neovim** | `nvim_set_hl` calls, `hl()` wrappers, or plain group tables, with `c.blue`-style palette references resolved. |
+| **Vim** | `hi Group guifg=…` lines, plus `g:terminal_ansi_colors`. |
+| **Emacs** | A `deftheme` — `let` bindings resolved through `custom-theme-set-faces`. |
+| **base16 / base24** | Both the classic flat form and tinted-theming's `palette:` nesting. |
+| **Terminals** | Alacritty (TOML *and* the older YAML), kitty, Ghostty, WezTerm, Windows Terminal, iTerm2 `.itermcolors`, Xresources. |
+| **Anything else** | Any text with hex codes in it, sorted by lightness and hue into the nearest roles. |
+
+Most formats are partial by nature — a kitty conf has sixteen ANSI colors and
+nothing to say about comments. Rather than leave the gaps black, the missing
+roles are derived from the ones that were found, following the [base16 styling
+guideline](https://github.com/chriskempson/base16/blob/main/styling.md) for
+which terminal color stands in for which syntax idea. The dialog then reports
+the split — *"24 of 48 roles read from the file, 24 derived"* — and marks the
+derived swatches with a dashed outline, so nothing is presented as having come
+from your file when it didn't.
 
 ### tmux studio
 
@@ -149,6 +177,8 @@ lib/
     tokenize.ts       hand-rolled tokenizer (tsx, python, rust, go, lua, css)
     samples.ts        preview code
   export/             one module per target + the shared Vim/Neovim group table
+  import/             format sniffing, one parser per format, and the
+                      derivation that grows a partial read into all 48 roles
   tmux/               config model and .tmux.conf generator
 components/
   preview/
@@ -187,8 +217,15 @@ no errors.
 
 ## Contributing
 
-Issues and pull requests are welcome. New export targets, new preset seeds, and
-tokenizer fixes for languages that look wrong are all good places to start.
+Issues and pull requests are welcome. New export targets, new import formats,
+new preset seeds, and tokenizer fixes for languages that look wrong are all good
+places to start.
+
+An importer is a `Parser` (`lib/import/types.ts`): an id, a label, a cheap
+`detect()` sniff, and a `parse()` that returns whatever roles it can find.
+Detection is deliberately optimistic — a format only wins if its parser actually
+returns something — so add it to `PARSERS` above the vaguer formats and below
+the more specific ones.
 
 ## License
 

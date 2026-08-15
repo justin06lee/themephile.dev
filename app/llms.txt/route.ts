@@ -1,4 +1,5 @@
 import { TARGETS } from "@/lib/export";
+import { PARSERS } from "@/lib/import";
 import { LANGUAGES } from "@/lib/highlight/tokenize";
 import { PRESET_SEEDS } from "@/lib/theme/presets";
 import {
@@ -30,13 +31,25 @@ export function GET() {
 
 > themephile is a free, open-source (MIT) theme editor for code. Design a syntax
 > colorscheme against live previews of VS Code, Neovim, Vim, Emacs, and a terminal,
-> then copy a ready-to-paste config for your editor, your terminal, or tmux. It runs
-> entirely in the browser: no account, no backend, nothing uploaded.
+> then copy a ready-to-paste config for your editor, your terminal, or tmux. Existing
+> themes can be imported by pasting the file or dropping it in. It runs entirely in the
+> browser: no account, no backend, nothing uploaded.
 
 ## Tools
 
 - [Theme editor](${SITE_URL}/editor): Edit ${ROLE_IDS.length} color roles against live previews of five programs, with ${LANGUAGES.length} sample languages (${LANGUAGES.map((l) => l.label).join(", ")}) and ${PRESET_SEEDS.length} starting presets. Requires JavaScript.
 - [tmux studio](${SITE_URL}/tmux): Build a tmux status bar visually — segments, powerline separators, pane borders, prefix key — and export a complete .tmux.conf. Requires JavaScript.
+
+## Import formats
+
+A theme can be pasted in or dropped in as a file; it is parsed in the browser and
+mapped onto the ${ROLE_IDS.length} roles. Roles a format cannot express are derived from the ones
+it can, following the base16 convention, and the dialog reports exactly which.
+
+${PARSERS.filter((p) => p.id !== "hex-list")
+  .map((p) => `- ${p.label}: ${p.blurb}`)
+  .join("\n")}
+- Anything else: any text containing hex colors, sorted by lightness and hue into the nearest roles.
 
 ## Export targets
 

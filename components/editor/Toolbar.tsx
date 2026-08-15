@@ -20,9 +20,17 @@ type Props = {
   onUndo: () => void;
   canUndo: boolean;
   onExport: () => void;
+  onImport: () => void;
 };
 
-export function Toolbar({ theme, onCommit, onUndo, canUndo, onExport }: Props) {
+export function Toolbar({
+  theme,
+  onCommit,
+  onUndo,
+  canUndo,
+  onExport,
+  onImport,
+}: Props) {
   const [shared, setShared] = useState(false);
   const failing = lowContrastRoles(theme).length;
 
@@ -70,6 +78,16 @@ export function Toolbar({ theme, onCommit, onUndo, canUndo, onExport }: Props) {
 
       <div className="ml-auto flex flex-wrap items-center gap-1.5">
         <PresetMenu onPick={applySeed} />
+
+        {/* Sits with Presets rather than with Export: both answer "what am I
+            starting from?", and Export answers "where does it go?". */}
+        <button
+          className="btn text-xs"
+          title="Paste or drop a theme you already have"
+          onClick={onImport}
+        >
+          Import
+        </button>
 
         <button
           className="btn text-xs"

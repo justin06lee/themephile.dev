@@ -18,6 +18,7 @@ import {
 } from "@/lib/theme/serialize";
 import { setColor, type Theme } from "@/lib/theme/theme";
 import { ExportDialog } from "./ExportDialog";
+import { ImportDialog } from "./ImportDialog";
 import { Inspector } from "./Inspector";
 import { RoleList } from "./RoleList";
 import { Toolbar } from "./Toolbar";
@@ -52,6 +53,7 @@ export function EditorWorkspace() {
   const [lang, setLang] = useState<LangId>("tsx");
   const [target, setTarget] = useState<PreviewTargetId>("vscode");
   const [exportOpen, setExportOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   // ── persist + keep the share link live ──
   useEffect(() => {
@@ -134,6 +136,7 @@ export function EditorWorkspace() {
         onUndo={undo}
         canUndo={history.length > 0}
         onExport={() => setExportOpen(true)}
+        onImport={() => setImportOpen(true)}
       />
 
       <main className="flex min-h-0 flex-1 flex-col lg:flex-row">
@@ -162,6 +165,13 @@ export function EditorWorkspace() {
           />
         </aside>
       </main>
+
+      {/* An import is one undo step, so a mis-drop costs a keystroke. */}
+      <ImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={commit}
+      />
 
       {/* Keyed by target so opening Export lands on whatever you're previewing. */}
       <ExportDialog
