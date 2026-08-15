@@ -138,19 +138,20 @@ That's the whole golden path. The other targets:
 ```bash
 make build       # production build
 make check       # tsc, eslint, and a build — what CI runs
-make types       # regenerate lib/supabase/database.types.ts from the live schema
-make update      # newest dependencies, fresh types, clean rebuild
+make db-push     # create the database if needed, then apply every migration
+make update      # newest dependencies, clean rebuild
 ```
 
-**The gallery is optional.** Without `.env.local` the editor and tmux studio
-work exactly as documented and `/themes` renders a "not configured" notice —
-you do not need to provision a database to hack on the editor. To enable it,
-copy `.env.example` to `.env.local` and fill in the two values from your own
-Supabase project.
+**The gallery is optional, and it degrades in two independent steps.** Without
+`TURSO_DATABASE_URL` the editor and tmux studio work exactly as documented and
+`/themes` renders a "not configured" notice. With a database but no GitHub app,
+the gallery is fully readable and crawlable but can't take new themes — the
+sign-in button hides itself rather than offering something that can only fail.
+So you never need to provision anything to hack on the editor.
 
-Next.js 16 (App Router), React 19, Tailwind CSS v4, and `@supabase/supabase-js`
-for the gallery alone. The syntax highlighter, the color math, every exporter
-and every importer are local code with no dependencies at all.
+Next.js 16 (App Router), React 19, Tailwind CSS v4, and `@libsql/client` for
+the gallery alone. The syntax highlighter, the color math, every exporter and
+every importer are local code with no dependencies at all.
 
 ## Privacy
 
@@ -196,8 +197,11 @@ app/
   page.tsx            landing
   editor/page.tsx     theme editor    → components/editor/EditorApp
   tmux/page.tsx       tmux studio     → components/tmux/TmuxApp
-  themes/             gallery index and one page per published theme,
-                      each with a social card in its own palette
+  themes/             gallery index and one page per published theme, each
+                      with a social card in its own palette; actions.ts holds
+                      every mutation
+  api/                auth callback, sign-out, and /api/me — the one uncached
+                      request that keeps every other page cacheable
   icon.svg            the animated favicon
   apple-icon.tsx      iOS home-screen icon (iOS won't take an SVG)
   opengraph-image.tsx social card, one per route, generated from the real palette
@@ -220,8 +224,9 @@ lib/
   export/             one module per target + the shared Vim/Neovim group table
   import/             format sniffing, one parser per format, and the
                       derivation that grows a partial read into all 48 roles
-  supabase/           clients and generated types; `config.ts` is what makes
-                      the gallery optional
+  env.ts              server-only config; what makes the gallery optional
+  db/                 the libSQL client and row-narrowing helpers
+  auth/               GitHub OAuth and the signed session cookie
   gallery/            queries and the palette <-> row conversion
   tmux/               config model and .tmux.conf generator
 components/
@@ -255,36 +260,44 @@ two colorschemes can't drift apart.
 
 ## How the gallery is built
 
-**Auth is client-side only, and that's a design decision rather than a
-shortcut.** Gallery pages are public content that renders identically for
-everyone, so they stay statically cacheable and fully crawlable; the only
-per-person state — whether *you* liked this one — hydrates afterwards. That
-also means no proxy hop on every request and no auth cookie for pages that
-don't need one. (In Next.js 16 the file would be `proxy.ts`, not
-`middleware.ts` — the convention was renamed.)
+SQLite on [Turso](https://turso.tech), and about 150 lines of auth.
 
-**Postgres enforces the rules, not the client.** Three tables — `profiles`,
-`themes`, `likes` — with row-level security throughout: everything is
-world-readable, and you may only write rows that are yours.
+**The browser never touches the database.** The Turso token is a server-only
+secret, so every read goes through a server component or route handler and
+every write goes through a server action. There is no row-level security here
+and no per-column grants, because there is no untrusted client on the other end
+of the connection — authorisation lives in `app/themes/actions.ts`, and every
+action re-establishes who is asking rather than trusting that the UI only
+rendered the button for the right person. Next's framework check compares
+`Origin` to `Host` and stops there; the rest is ours.
 
-RLS alone isn't enough, though, because it decides which *rows* you may touch
-and not which *columns*. `like_count` is denormalized onto `themes` so "most
-liked" is an index scan, and an author legitimately owns that row — so
-column-level grants withhold `like_count` (and `slug`, and `author_id`) from
-`authenticated` entirely. The counter is maintained by a `SECURITY DEFINER`
-trigger on `likes`, which is the only thing that can write it.
+**Pages stay cacheable anyway.** Gallery pages are public content that renders
+identically for everyone, so they remain statically cached and fully crawlable.
+The only person-shaped state — are you signed in, which themes have you liked —
+comes from one uncached request to `/api/me` after hydration. One uncacheable
+request buys a fully cacheable page.
 
-Two operations are RPCs because they have to be atomic. `publish_theme`
-allocates a slug by catching `unique_violation` and retrying — two people
-publishing "Nord" in the same second would both see the name as free, so a
-read-then-write from the client is a race by construction. `toggle_like`
-returns the resulting state so the client never has to guess whether its
-optimistic update was right. Both are `SECURITY INVOKER`: they're a
-convenience, not a privilege escalation.
+**Sign-in is the GitHub OAuth web flow, by hand.** Send the user to GitHub with
+a `state` we can recognise, verify it came back unchanged, trade the `code` for
+a token, ask who they are, then throw the token away. No scope is requested, so
+the grant covers public profile data only. The session is a stateless cookie
+signed with HMAC-SHA256 via Web Crypto — no session table, no dependency, and
+`crypto.subtle.verify` is constant-time, which is the property a hand-rolled
+comparison usually gets wrong. It's `HttpOnly` and `SameSite=Lax`; Lax rather
+than Strict because the OAuth callback is a top-level navigation from
+github.com and Strict would withhold the cookie on exactly that hop.
 
-Palettes are validated in the database as well as in the client — RLS lets any
-signed-in user write here, and "authenticated" is not the same as
-"well-behaved".
+**Identity is the GitHub numeric id, never the handle.** Handles can be renamed
+and the old one becomes available to someone else, so matching on the handle
+would eventually hand one person's themes to another.
+
+Slug allocation catches the unique-constraint violation and retries rather than
+checking first: two people publishing "Nord" in the same second would both see
+the name as free, so the index has to be the authority.
+
+The rest of the schema notes — why `like_count` is denormalized, why
+`updated_at` is written by the application instead of a trigger, why palette
+validation is a trigger rather than a `CHECK` — are in [`db/README.md`](db/README.md).
 
 ## Verification
 

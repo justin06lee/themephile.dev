@@ -2,7 +2,6 @@ import { DEFAULT_THEME } from "@/lib/theme/presets";
 import { ROLE_IDS, type ColorMap } from "@/lib/theme/roles";
 import type { Appearance, Theme, ThemeSeed } from "@/lib/theme/theme";
 import { hexToOklch } from "@/lib/color";
-import type { Json } from "@/lib/supabase/database.types";
 
 export type GalleryTheme = {
   id: string;
@@ -23,7 +22,7 @@ const HEX = /^#[0-9a-f]{6}$/i;
  * Adding a role later must not turn every existing theme into a black
  * rectangle, so anything missing falls back to the default theme's value.
  */
-export function readPalette(stored: Json): ColorMap {
+export function readPalette(stored: unknown): ColorMap {
   const source = (stored ?? {}) as Record<string, unknown>;
   const colors = {} as ColorMap;
   for (const id of ROLE_IDS) {

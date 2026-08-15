@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnsiStrip, MiniPreview } from "@/components/gallery/MiniPreview";
-import { handleOf, useSession } from "@/components/gallery/session";
+import { useSession } from "@/components/gallery/session";
+import { publishTheme } from "@/app/themes/actions";
 import { writePalette } from "@/lib/gallery/theme";
-import { supabase } from "@/lib/supabase/client";
 import { ANSI_ORDER } from "@/lib/theme/roles";
 import type { Theme } from "@/lib/theme/theme";
 
@@ -24,7 +24,7 @@ export function PublishDialog({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { enabled, ready, user, signIn } = useSession();
+  const { enabled, canSignIn, ready, user, signIn } = useSession();
 
   const [name, setName] = useState(theme.name);
   const [blurb, setBlurb] = useState("");
@@ -49,21 +49,24 @@ export function PublishDialog({
   const publish = async () => {
     setBusy(true);
     setError(null);
-    const { data, error: rpcError } = await supabase().rpc("publish_theme", {
-      p_name: name.trim().slice(0, 48),
-      p_blurb: blurb.trim().slice(0, 140),
-      p_appearance: theme.appearance,
-      p_colors: writePalette(theme),
+
+    // The action re-checks the session and re-validates every field. This call
+    // is a convenience, not the security boundary.
+    const result = await publishTheme({
+      name: name.trim().slice(0, 48),
+      blurb: blurb.trim().slice(0, 140),
+      appearance: theme.appearance,
+      colors: writePalette(theme),
     });
 
-    if (rpcError || !data) {
-      // Postgres raises carry our own wording; show it rather than a generic
-      // failure, because "you've hit 60 themes" is actionable and "error" isn't.
-      setError(rpcError?.message ?? "Publishing failed. Try again in a moment.");
+    if (!result.ok) {
+      // The database's own wording is written to be read by a person —
+      // "you've hit 60 themes" is actionable where "error" isn't.
+      setError(result.error);
       setBusy(false);
       return;
     }
-    router.push(`/themes/${(data as { slug: string }).slug}`);
+    router.push(`/themes/${result.slug}`);
   };
 
   return (
@@ -104,7 +107,7 @@ export function PublishDialog({
         {!enabled ? (
           <Body>
             The gallery isn&rsquo;t configured in this build — there&rsquo;s no
-            Supabase project to publish to. Everything else works; see{" "}
+            database to publish to. Everything else works; see{" "}
             <code className="rounded bg-raised px-1 py-0.5 font-mono text-[11px]">
               .env.example
             </code>
@@ -115,17 +118,29 @@ export function PublishDialog({
         ) : !user ? (
           <>
             <Body>
-              Publishing needs a name to attach the theme to, so this is the one
-              place themephile asks you to sign in. Browsing, editing, exporting
-              and sharing never will.
+              {canSignIn ? (
+                <>
+                  Publishing needs a name to attach the theme to, so this is the
+                  one place themephile asks you to sign in. Browsing, editing,
+                  exporting and sharing never will.
+                </>
+              ) : (
+                <>
+                  This build has a gallery to read but no GitHub app configured,
+                  so there&rsquo;s no way to sign in yet. Your theme is safe —
+                  it&rsquo;s in this tab and in the share link.
+                </>
+              )}
             </Body>
             <Footer>
               <button className="btn text-xs" onClick={onClose}>
                 Cancel
               </button>
-              <button className="btn btn-primary text-xs" onClick={() => void signIn()}>
-                Sign in with GitHub
-              </button>
+              {canSignIn && (
+                <button className="btn btn-primary text-xs" onClick={signIn}>
+                  Sign in with GitHub
+                </button>
+              )}
             </Footer>
           </>
         ) : (
@@ -153,7 +168,7 @@ export function PublishDialog({
               </label>
 
               <p className="text-xs leading-relaxed text-ink-faint">
-                Publishing as <strong className="font-medium text-ink">{handleOf(user)}</strong>
+                Publishing as <strong className="font-medium text-ink">{user.username}</strong>
                 {" "}· {theme.appearance} · all 48 roles. You can delete it later.
               </p>
 

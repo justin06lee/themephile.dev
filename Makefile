@@ -1,10 +1,11 @@
 # themephile — everything is bun; `make` alone does the whole golden path.
 
-SUPABASE_PROJECT_ID ?= qyzdrsyabtnbpaszucsu
-TYPES := lib/supabase/database.types.ts
+TURSO   := $(HOME)/.turso/turso
+DB_NAME ?= themephile
+MIGRATIONS := $(sort $(wildcard db/migrations/*.sql))
 
 .DEFAULT_GOAL := all
-.PHONY: all install env dev build start check lint types update migrate clean
+.PHONY: all install env dev build start check lint db-push db-shell db-url update clean
 
 ## make — install, check the environment, and start the dev server.
 all: install env
@@ -14,12 +15,19 @@ all: install env
 install:
 	bun install
 
-## The gallery is optional. Say so plainly rather than failing at runtime.
+## The gallery is optional, and it fails in two independent steps.
+## Say which one you're in rather than letting it surprise you at runtime.
 env:
 	@if [ ! -f .env.local ]; then \
 		printf '\033[33m.env.local is missing.\033[0m The editor and tmux studio work without it;\n'; \
-		printf 'the theme gallery will render a "not configured" notice.\n'; \
-		printf 'To enable it: cp .env.example .env.local, then fill in the two values.\n\n'; \
+		printf '/themes will say it is not configured.\n'; \
+		printf 'To enable the gallery: cp .env.example .env.local, then fill it in.\n\n'; \
+	elif ! grep -q '^TURSO_AUTH_TOKEN=.' .env.local 2>/dev/null; then \
+		printf '\033[33mTURSO_AUTH_TOKEN is empty\033[0m — the gallery will render as unconfigured.\n'; \
+		printf 'Run: make db-push\n\n'; \
+	elif ! grep -q '^GITHUB_CLIENT_SECRET=.' .env.local 2>/dev/null; then \
+		printf '\033[33mNo GitHub app configured\033[0m — the gallery is readable but sign-in is hidden.\n'; \
+		printf 'See .env.example for the two-minute setup.\n\n'; \
 	fi
 
 dev: install
@@ -40,29 +48,33 @@ check: install
 	bunx eslint .
 	bun run build
 
-## Regenerate the database types from the live schema.
-## Needs a Supabase access token: https://supabase.com/dashboard/account/tokens
-types:
-	@if [ -z "$$SUPABASE_ACCESS_TOKEN" ]; then \
-		printf '\033[31mSUPABASE_ACCESS_TOKEN is not set.\033[0m\n'; \
-		printf 'Create one at https://supabase.com/dashboard/account/tokens, then:\n'; \
-		printf '  SUPABASE_ACCESS_TOKEN=sbp_... make types\n'; \
-		exit 1; \
-	fi
-	bunx supabase gen types typescript --project-id $(SUPABASE_PROJECT_ID) > $(TYPES)
-	@printf '\033[32mWrote %s\033[0m\n' '$(TYPES)'
+## Create the database if it isn't there, then apply every migration.
+## Migrations are written to be re-runnable, so this is safe to repeat.
+db-push:
+	@command -v $(TURSO) >/dev/null 2>&1 || { \
+		printf '\033[31mTurso CLI not found.\033[0m Install it:\n'; \
+		printf '  curl -sSfL https://get.tur.so/install.sh | bash\n'; exit 1; }
+	@$(TURSO) auth whoami >/dev/null 2>&1 || { \
+		printf '\033[31mNot logged in.\033[0m Run: $(TURSO) auth login\n'; exit 1; }
+	@$(TURSO) db show $(DB_NAME) >/dev/null 2>&1 || $(TURSO) db create $(DB_NAME)
+	@for file in $(MIGRATIONS); do \
+		printf 'applying %s\n' "$$file"; \
+		$(TURSO) db shell $(DB_NAME) < "$$file" || exit 1; \
+	done
+	@printf '\033[32mSchema is up to date.\033[0m\n'
+	@printf 'URL:   %s\n' "$$($(TURSO) db show $(DB_NAME) --url)"
+	@printf 'Token: run `$(TURSO) db tokens create $(DB_NAME)`\n'
 
-## Show which migrations the remote database has applied.
-migrate:
-	@if [ -z "$$SUPABASE_ACCESS_TOKEN" ]; then \
-		printf 'Set SUPABASE_ACCESS_TOKEN first (see `make types`).\n'; exit 1; \
-	fi
-	bunx supabase migration list --project-ref $(SUPABASE_PROJECT_ID)
+## An interactive SQL shell against the live database.
+db-shell:
+	@$(TURSO) db shell $(DB_NAME)
 
-## Full refresh: newest dependencies, regenerated types, clean rebuild.
+db-url:
+	@$(TURSO) db show $(DB_NAME) --url
+
+## Full refresh: newest dependencies, clean rebuild.
 update:
 	bun update
-	@$(MAKE) types || printf '\033[33mSkipped type generation (no access token).\033[0m\n'
 	@$(MAKE) clean
 	bun run build
 
