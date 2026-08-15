@@ -78,7 +78,7 @@ ${GROUP_ORDER.map(
 - Palettes are generated in OKLCh from a seed: background, foreground, base hue, harmony scheme, chroma multiplier.
 - Contrast: every role shows its live WCAG ratio against the canvas. "Fix contrast" finds roles below the AA-large 3:1 floor and lifts them past 4:1 by changing lightness only, preserving hue and chroma.
 - Generated configs are checked against the real programs: the Emacs theme loads under \`emacs --batch\`, the Vim colorscheme sources under \`vim -es -u NONE\`, and each .tmux.conf boots a real tmux server.
-- Built with Next.js 16 (App Router), React 19, Tailwind CSS v4, and @supabase/supabase-js for the gallery alone. The highlighter, colour maths, exporters and importers have no dependencies.
+- Built with Next.js 16 (App Router), React 19, Tailwind CSS v4, and @libsql/client for the gallery alone (SQLite on Turso). The highlighter, colour maths, exporters and importers have no dependencies.
 `;
 
   return new Response(body, {

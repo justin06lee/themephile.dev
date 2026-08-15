@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { SiteFooter, SiteNav } from "@/components/site/SiteNav";
 import { countThemes, listThemes, PAGE_SIZE, SORTS, type Sort } from "@/lib/gallery/queries";
 import { galleryGraph } from "@/lib/seo/schema";
-import { galleryEnabled } from "@/lib/supabase/config";
+import { galleryEnabled } from "@/lib/env";
 import { openGraphBase } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -84,7 +84,7 @@ export default async function ThemesPage({ searchParams }: PageProps<"/themes">)
         {!galleryEnabled ? (
           <Notice
             title="The gallery isn't configured here"
-            body="This build has no NEXT_PUBLIC_SUPABASE_URL, so there's nothing to list. The editor and tmux studio work without it — see .env.example."
+            body="This build has no TURSO_DATABASE_URL, so there's nothing to list. The editor and tmux studio work without it — see .env.example."
           />
         ) : (
           <>

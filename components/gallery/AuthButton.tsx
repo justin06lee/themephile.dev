@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { avatarOf, handleOf, useSession } from "./session";
+import { useSession } from "./session";
 
 /**
  * The only place on the site that mentions signing in. It appears on the
@@ -11,7 +11,7 @@ import { avatarOf, handleOf, useSession } from "./session";
  * exporting and sharing have nothing to do with having an account.
  */
 export function AuthButton() {
-  const { enabled, ready, user, signIn, signOut } = useSession();
+  const { enabled, canSignIn, ready, user, signIn, signOut } = useSession();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,17 +34,20 @@ export function AuthButton() {
   // Reserve the space rather than popping a button in after hydration.
   if (!ready) return <span className="h-7 w-24 rounded-md bg-raised/50" aria-hidden />;
 
+  // Sign-in is hidden rather than broken when no OAuth app is configured:
+  // a button that can only fail is worse than no button.
   if (!user) {
+    if (!canSignIn) return null;
     return (
-      <button className="btn text-xs" onClick={() => void signIn()}>
+      <button className="btn text-xs" onClick={signIn}>
         <GitHubMark />
         Sign in
       </button>
     );
   }
 
-  const handle = handleOf(user);
-  const avatar = avatarOf(user);
+  const handle = user.username;
+  const avatar = user.avatarUrl;
 
   return (
     <div ref={ref} className="relative">
