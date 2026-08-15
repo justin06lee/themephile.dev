@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { SAMPLES } from "@/lib/highlight/samples";
 import { tokenizeLines } from "@/lib/highlight/tokenize";
 import { PRESETS } from "@/lib/theme/presets";
+import type { Theme } from "@/lib/theme/theme";
 
 /**
  * The shared social card.
@@ -26,9 +27,18 @@ export const contentType = "image/png";
 const FIRST_LINE = 17;
 const LINE_COUNT = 9;
 
-export function ogCard(headline: string, footer: string) {
-  const theme = PRESETS[0]; // Nocturne — the default, and the site's identity hue
+export function ogCard(headline: string, footer: string, subject?: Theme) {
+  // Defaults to Nocturne — the site's own identity hue. Gallery routes pass
+  // the published theme instead, so a shared link previews that palette.
+  const theme = subject ?? PRESETS[0];
   const c = theme.colors;
+
+  // The site's own cards end with the eight preset accents, as a "there are
+  // more where this came from" signal. A published theme's card has no
+  // business advertising other palettes, so it shows its own instead.
+  const dots = subject
+    ? [c.ansiRed, c.ansiYellow, c.ansiGreen, c.ansiCyan, c.ansiBlue, c.ansiMagenta]
+    : PRESETS.map((p) => p.colors.accent);
   const lines = tokenizeLines(SAMPLES.tsx, "tsx").slice(
     FIRST_LINE - 1,
     FIRST_LINE - 1 + LINE_COUNT,
@@ -123,15 +133,15 @@ export function ogCard(headline: string, footer: string) {
         >
           <div style={{ display: "flex" }}>{footer}</div>
           <div style={{ display: "flex", marginLeft: "auto" }}>
-            {PRESETS.map((p) => (
+            {dots.map((color, i) => (
               <div
-                key={p.name}
+                key={i}
                 style={{
                   width: 14,
                   height: 14,
                   borderRadius: 7,
                   marginLeft: 8,
-                  background: p.colors.accent,
+                  background: color,
                 }}
               />
             ))}

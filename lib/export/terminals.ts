@@ -225,15 +225,30 @@ export const weztermTarget: ExportTarget = {
 
 /* ---------------------------- windows terminal ---------------------------- */
 
+/**
+ * Windows Terminal's scheme keys are lowercase, and ANSI 5 is spelled
+ * `purple` — not `magenta`, the way every other terminal spells it. Keys that
+ * don't match are dropped silently, with no error and no warning, so this
+ * table is deliberately separate from `NAMES`.
+ */
+const WT_NAMES = [
+  "black",
+  "red",
+  "green",
+  "yellow",
+  "blue",
+  "purple",
+  "cyan",
+  "white",
+] as const;
+
 function windowsTerminal(t: Theme): string {
   const c = t.colors;
   const named = Object.fromEntries(
     [...normal(t), ...bright(t)].map((hex, i) => {
-      const base = NAMES[i % 8];
+      const base = WT_NAMES[i % 8];
       const label =
-        i < 8
-          ? base.charAt(0).toUpperCase() + base.slice(1)
-          : `Bright${base.charAt(0).toUpperCase() + base.slice(1)}`;
+        i < 8 ? base : `bright${base.charAt(0).toUpperCase() + base.slice(1)}`;
       return [label, hex];
     }),
   );

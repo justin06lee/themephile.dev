@@ -20,9 +20,19 @@ type Props = {
   onUndo: () => void;
   canUndo: boolean;
   onExport: () => void;
+  onImport: () => void;
+  onPublish: () => void;
 };
 
-export function Toolbar({ theme, onCommit, onUndo, canUndo, onExport }: Props) {
+export function Toolbar({
+  theme,
+  onCommit,
+  onUndo,
+  canUndo,
+  onExport,
+  onImport,
+  onPublish,
+}: Props) {
   const [shared, setShared] = useState(false);
   const failing = lowContrastRoles(theme).length;
 
@@ -70,6 +80,16 @@ export function Toolbar({ theme, onCommit, onUndo, canUndo, onExport }: Props) {
 
       <div className="ml-auto flex flex-wrap items-center gap-1.5">
         <PresetMenu onPick={applySeed} />
+
+        {/* Sits with Presets rather than with Export: both answer "what am I
+            starting from?", and Export answers "where does it go?". */}
+        <button
+          className="btn text-xs"
+          title="Paste or drop a theme you already have"
+          onClick={onImport}
+        >
+          Import
+        </button>
 
         <button
           className="btn text-xs"
@@ -127,6 +147,12 @@ export function Toolbar({ theme, onCommit, onUndo, canUndo, onExport }: Props) {
 
         <button className="btn text-xs" onClick={share}>
           {shared ? "Link copied" : "Share"}
+        </button>
+
+        {/* Next to Share, not next to Export: both send the theme outward,
+            while Export brings a file back to you. */}
+        <button className="btn text-xs" onClick={onPublish} title="Put it in the gallery">
+          Publish
         </button>
 
         <button className="btn btn-primary text-xs" onClick={onExport}>
